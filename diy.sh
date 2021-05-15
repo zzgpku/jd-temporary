@@ -32,7 +32,14 @@ jd_zjd_tuan.js
 z_xmf.js
 monk_shop_add_to_car.js
 z_fanslove.js
-
+jd_car_exchange.js
+jd_joy_reward.js
+jddj_bean.js
+jddj_fruit.js
+jddj_fruit_collectWater.js
+jddj_getPoints.js
+jddj_getck.js
+jddj_plantBeans.js
 "
 
 
