@@ -40,6 +40,7 @@ jddj_fruit_collectWater.js
 jddj_getPoints.js
 jddj_getck.js
 jddj_plantBeans.js
+jddj_cookie.js
 "
 
 
