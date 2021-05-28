@@ -6,17 +6,14 @@ cookie只要里面的deviceid_pdj_jd=xxx-xxx-xxx;o2o_m_h5_sid=xxx-xxx-xxx关键�
 一天运行一次
 boxjs订阅地址:https://gitee.com/passerby-b/javascript/raw/master/JD/passerby-b.boxjs.json
 TG群:https://t.me/passerbyb2021
-
 [task_local]
-0 0 * * * https://raw.githubusercontent.com/passerby-b/JDDJ/main/jddj_plantBeans.js
-
-================Loon==============
+10 0 * * * https://raw.githubusercontent.com/passerby-b/JDDJ/main/jddj_plantBeans.js
 [Script]
-cron "0 0 * * *" script-path=https://raw.githubusercontent.com/passerby-b/JDDJ/main/jddj_plantBeans.js,tag=京东到家鲜豆庄园
-
+cron "10 0 * * *" script-path=https://raw.githubusercontent.com/passerby-b/JDDJ/main/jddj_plantBeans.js,tag=京东到家鲜豆庄园
 */
 
 const $ = new API("jddj_plantBeans");
+let ckPath = './jddj_cookie.js';//ck路径,环境变量:JDDJ_CKPATH
 let cookies = [];
 let thiscookie = '', deviceid = '';
 let lat = '30.' + Math.round(Math.random() * (99999 - 10000) + 10000);
@@ -24,7 +21,10 @@ let lng = '114.' + Math.round(Math.random() * (99999 - 10000) + 10000);
 let cityid = Math.round(Math.random() * (1500 - 1000) + 1000);
 !(async () => {
     if (cookies.length == 0) {
-        if ($.env.isNode) { delete require.cache['./jddj_cookie.js']; cookies = require('./jddj_cookie.js') }
+        if ($.env.isNode) {
+            if (process.env.JDDJ_CKPATH) ckPath = process.env.JDDJ_CKPATH;
+            delete require.cache[ckPath]; cookies = require(ckPath);
+        }
         else {
             let ckstr = $.read('#jddj_cookies');
             if (!!ckstr) {
@@ -176,19 +176,21 @@ async function getPoints() {
         try {
             let option = urlTask('https://daojia.jd.com/client?_jdrandom=' + Math.round(new Date()) + '&_funid_=plantBeans/getActivityInfo', 'functionId=plantBeans%2FgetActivityInfo&isNeedDealError=true&method=POST&body=%7B%7D&lat=' + lat + '&lng=' + lat + '&lat_pos=' + lat + '&lng_pos=' + lat + '&city_id=' + cityid + '&channel=ios&platform=6.6.0&platCode=h5&appVersion=6.6.0&appName=paidaojia&deviceModel=appmodel&traceId=' + deviceid + Math.round(new Date()) + '&deviceToken=' + deviceid + '&deviceId=' + deviceid);
 
-            let perid = '', nextid = ''; activityDay = '';
+            let perid = '', nextid = ''; activityDay = '', pre_buttonId = 0;
             await $.http.post(option).then(response => {
+                //console.log(response.body);
                 let data = JSON.parse(response.body);
                 perid = data.result.pre.activityId;
-                nextid = data.result.next.activityId;
+                if (data.result.next) nextid = data.result.next.activityId;
                 activityDay = data.result.cur.activityDay;
+                pre_buttonId = data.result.pre.buttonId;
             })
 
             await $.wait(1000);
 
-            var date = new Date();
-            activityDay = activityDay.split('-')[1].split('.')[1];
-            if (date.getDate() == activityDay) {
+            //var date = new Date();
+            //activityDay = activityDay.split('-')[1].split('.')[1];
+            if (pre_buttonId == 1) {
                 option = urlTask('https://daojia.jd.com/client?_jdrandom=' + Math.round(new Date()), 'functionId=plantBeans%2FgetPoints&isNeedDealError=true&method=POST&body=%7B%22activityId%22%3A%22' + perid + '%22%7D&lat=' + lat + '&lng=' + lng + '&lat_pos=' + lat + '&lng_pos=' + lng + '&city_id=' + cityid + '&channel=ios&platform=6.6.0&platCode=h5&appVersion=6.6.0&appName=paidaojia&deviceModel=appmodel&traceId=' + deviceid + Math.round(new Date()) + '&deviceToken=' + deviceid + '&deviceId=' + deviceid + '');
 
                 await $.http.post(option).then(response => {
@@ -198,12 +200,12 @@ async function getPoints() {
 
                 await $.wait(1000);
 
-                option = urlTask('https://daojia.jd.com/client?_jdrandom=' + Math.round(new Date()), 'functionId=plantBeans%2FgetActivityInfo&isNeedDealError=true&method=POST&body=%7B%22activityId%22%3A%22' + nextid + '%22%7D&lat=' + lat + '&lng=' + lng + '&lat_pos=' + lat + '&lng_pos=' + lng + '&city_id=' + cityid + '&channel=ios&platform=6.6.0&platCode=h5&appVersion=6.6.0&appName=paidaojia&deviceModel=appmodel&traceId=' + deviceid + Math.round(new Date()) + '&deviceToken=' + deviceid + '&deviceId=' + deviceid + '');
+                // option = urlTask('https://daojia.jd.com/client?_jdrandom=' + Math.round(new Date()), 'functionId=plantBeans%2FgetActivityInfo&isNeedDealError=true&method=POST&body=%7B%22activityId%22%3A%22' + nextid + '%22%7D&lat=' + lat + '&lng=' + lng + '&lat_pos=' + lat + '&lng_pos=' + lng + '&city_id=' + cityid + '&channel=ios&platform=6.6.0&platCode=h5&appVersion=6.6.0&appName=paidaojia&deviceModel=appmodel&traceId=' + deviceid + Math.round(new Date()) + '&deviceToken=' + deviceid + '&deviceId=' + deviceid + '');
 
-                await $.http.post(option).then(response => {
-                    let data = JSON.parse(response.body);
-                    console.log('\n【参加下一轮种鲜豆】:' + data.msg);
-                })
+                // await $.http.post(option).then(response => {
+                //     let data = JSON.parse(response.body);
+                //     console.log('\n【参加下一轮种鲜豆】:' + data.msg);
+                // })
             }
 
         } catch (error) {
