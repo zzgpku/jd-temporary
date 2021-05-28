@@ -41,6 +41,7 @@ jddj_getPoints.js
 jddj_getck.js
 jddj_plantBeans.js
 jddj_cookie.js
+jd_jxnc.js
 "
 
 
